@@ -19,7 +19,7 @@ def cmd(name,args):
             args = cmds
         pass
     else:
-        args.insert(0,adbcmd)
+        args.insert(0,name)
     #print args    
 
     from subprocess import Popen, PIPE, STDOUT
@@ -30,6 +30,9 @@ def adb(args): return cmd(adbcmd,args)
 def aapt(args): return cmd(aaptcmd,args)
 
 
+# --- These functions should all return a tuple of strings
+# --- giving (output,errput).  Non-empty errput means an error occurred.
+
 def package_name(apk):
     'Given an Android Package filename, return the app name'
     out,err = aapt("d badging %s application" % apk)
@@ -38,7 +41,7 @@ def package_name(apk):
         if not chunks[0] == 'application:': continue
         name = line[line.find("label='")+7 : line.find("' icon=")]
         return (name,err)
-    return (None,err)
+    return ('',err)
     
 
 def ls_amazon():
@@ -54,21 +57,57 @@ def install_amazon_one(apk):
     pull_amazon(apk,apk)
     return adb("install " + apk)
 
-def install_amazon():
-    'Install all packages in the Amazon App Store'
+def cached_amazon():
+    "Return list of packages in Amazon's package cache"
     lines = ls_amazon()[0].split('\n')
-    installed = []
+    ret = []
     for line in lines[2:]:
         chunks = line.strip().split()
         if not chunks: break
         print chunks
-        fname = chunks[3]
+        ret.append(chunks[3])
+        continue
+    return ret
+
+def install_amazon():
+    'Install all packages in the Amazon App Store'
+    installed = []
+    for fname in cached_amazon():
         print 'Installing: fname'
         install_amazon_one(fname)
         installed.append(fname)
         continue
     return ("Installed: " + " ".join(installed),"")
 
+def server_pid():
+    'Return the server PID or nothing if not running'
+    out,err = cmd("ps","-eo pid,args")
+    for line in out.splitlines():
+        chunks = line.strip().split()
+        if 'adb fork-server server' == ' '.join(chunks[1:]):
+            return (chunks[0],"")
+        continue
+    return ('','')
+
+def start_server(password = None):
+    '''
+    Start the ADB server, return PID.  If password is given, use sudo.
+    If server already running, return an error.
+    '''
+    pid,err = server_pid()
+    if pid: return ('','ADB server already running at ' + pid)
+    
+    if password:
+        from subprocess import Popen, PIPE, STDOUT
+        args = ['sudo','-S',adbcmd,'start-server']
+        proc = Popen(args,stdin=PIPE,stdout=PIPE,stderr=PIPE,
+                     shell=True,universal_newlines=True)
+        return proc.communicate(password)
+
+    return adb('start-server')
+
+
+# ----------------- CLI ------------------------------------------------ #
 
 def print_cmd((out,err)):
     print out

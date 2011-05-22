@@ -27,6 +27,12 @@ Installation of the Android SDK is an exercise left to the reader.
 After it has been done, edit the ``basedir`` variable at the top of the
 ``droid`` script to reflect where it has been installed.
 
+The ``zendroid`` script relies on the PyZenity package.  It can be
+installed via::
+
+  shell> sudo easy_install pyzenity
+
+
 Installation
 ------------
 
@@ -34,7 +40,8 @@ It's just a script.  Copy or link it into your ``$PATH``.
 
 ::
 
-  shell> ln -s /path/to/the/unpacked/android-helper/droid /somewhere/bin/
+  shell> ln -s /path/to/the/unpacked/android-helper/droid.py /somewhere/bin/droid
+  shell> ln -s /path/to/the/unpacked/android-helper/zendroid.py /somewhere/bin/zendroid
 
 
 Start the server
@@ -76,6 +83,7 @@ named like ``vnz18515.apk``.  You can pull out a more useful name with::
 
   shell> droid package_name vnz18515.apk
   Enjoy Sudoku
+
 
 Available Methods
 -----------------
