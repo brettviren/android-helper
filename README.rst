@@ -24,8 +24,9 @@ Prerequisites
 -------------
 
 Installation of the Android SDK is an exercise left to the reader.
-After it has been done, edit the ``basedir`` variable at the top of the
-``droid`` script to reflect where it has been installed.
+You will only need the "Android SDK Platform-tools" for the scripts.
+After it has been done, edit the ``basedir`` variable at the top of
+the ``droid`` script to reflect where it has been installed.
 
 The ``zendroid`` script relies on the PyZenity package.  It can be
 installed via::

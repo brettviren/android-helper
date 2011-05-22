@@ -20,11 +20,14 @@ def cmd(name,args):
         pass
     else:
         args.insert(0,name)
-    #print args    
+    print args    
 
     from subprocess import Popen, PIPE, STDOUT
     proc = Popen(args,stdout=PIPE,stderr=STDOUT,universal_newlines=True)
-    return proc.communicate()    
+    out,err = proc.communicate()    
+    #print 'Command output:',out
+    #print 'Command error:',err
+    return out,err
     
 def adb(args): return cmd(adbcmd,args)
 def aapt(args): return cmd(aaptcmd,args)
@@ -42,7 +45,17 @@ def package_name(apk):
         name = line[line.find("label='")+7 : line.find("' icon=")]
         return (name,err)
     return ('',err)
-    
+
+def devices():
+    out,err = adb("devices")
+    if err: return out,err
+    ret = []
+    for line in out.split('\n'):
+        line = line.strip()
+        if not line: continue
+        if 'List of devices attached' == line: continue
+        ret.append(line)
+    return (' '.join(ret),'')
 
 def ls_amazon():
     'List the install cache area for Amazon App Store'
